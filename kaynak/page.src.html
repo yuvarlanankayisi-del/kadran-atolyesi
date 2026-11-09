@@ -1,0 +1,1092 @@
+<title>Kadran Atölyesi</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700&family=Bebas+Neue&family=Bodoni+Moda:wght@700&family=Chakra+Petch:wght@500;700&family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans:wght@400;500;600&family=Orbitron:wght@700&family=Rubik+Mono+One&family=Silkscreen&display=swap">
+<style>
+/* Yerlesim: onizleme ve sekme cubugu ustte sabit; altta tek seferde tek sekmenin ayarlari. Genis ekranda iki sutun. */
+:root {
+  --bg: #e9ecf1;
+  --panel: #ffffff;
+  --fg: #18202c;
+  --muted: #5a6577;
+  --line: #d3d9e2;
+  --accent: #2b55d9;
+  --accent-fg: #ffffff;
+  --bezel: #2a2f38;
+  --ok: #18794e;
+  --warn: #b4441b;
+  --f-display: "Chakra Petch", "Segoe UI", sans-serif;
+  --f-body: "IBM Plex Sans", "Segoe UI", Roboto, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11151c; --panel: #192029; --fg: #e6e9ef; --muted: #97a1b2; --line: #2b3441;
+    --accent: #7d9bff; --accent-fg: #0d1220; --bezel: #3a414d; --ok: #5cc995; --warn: #f08a62;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11151c; --panel: #192029; --fg: #e6e9ef; --muted: #97a1b2; --line: #2b3441;
+  --accent: #7d9bff; --accent-fg: #0d1220; --bezel: #3a414d; --ok: #5cc995; --warn: #f08a62;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 15px; line-height: 1.45;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 10px 40px;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.wrap { max-width: 1060px; margin: 0 auto; display: grid; gap: 12px; }
+header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 16px; }
+h1 { font-family: var(--f-display); font-weight: 700; font-size: 1.35rem; letter-spacing: .02em; margin: 0; }
+.device { font-family: var(--f-mono); font-size: .72rem; color: var(--muted); letter-spacing: .04em; }
+.grid { display: grid; gap: 14px; grid-template-columns: 1fr; }
+.stage { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg);
+  display: grid; gap: 8px; justify-items: center; min-width: 0; padding-block: 6px 8px; border-bottom: 1px solid var(--line); }
+@media (min-width: 860px) {
+  .grid { grid-template-columns: minmax(340px, 420px) 1fr; align-items: start; }
+  .stage { top: calc(env(safe-area-inset-top, 0px) + 12px); border-bottom: 0; }
+}
+.watch { position: relative; width: min(100%, 72vw, 36vh, 330px); aspect-ratio: 1; max-width: 100%; border-radius: 50%; padding: 10px;
+  background: radial-gradient(circle at 30% 25%, color-mix(in srgb, var(--bezel) 70%, #ffffff 30%), var(--bezel) 60%); box-shadow: 0 10px 26px rgba(10, 15, 30, .26); }
+@media (min-width: 860px) { .watch { width: min(100%, 360px); padding: 14px; } }
+.watch canvas { display: block; width: 100%; height: 100%; border-radius: 50%; background: #000; touch-action: none; }
+.watch canvas.draggable { cursor: grab; }
+.watch canvas.dragging { cursor: grabbing; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 3px; background: var(--panel); }
+.seg button { border: 0; background: transparent; color: var(--muted); font: 500 .85rem var(--f-body); padding: 5px 13px; border-radius: 999px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); }
+.seg.small button { font-size: .78rem; padding: 3px 11px; }
+.tabs { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; width: 100%; max-width: 460px; }
+.tabs button { min-width: 0; border: 1px solid var(--line); background: var(--panel); color: var(--fg); font: 600 clamp(.72rem, 3.1vw, .86rem) var(--f-body); padding: 8px 4px; border-radius: 10px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tabs button[hidden] { display: none; }
+.tabs button[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 4px 16px; min-width: 0; }
+.group { display: grid; gap: 12px; padding-block: 14px; border-top: 1px solid var(--line); min-width: 0; }
+.group:first-child { border-top: 0; }
+.group h3 { font-family: var(--f-display); font-size: .78rem; text-transform: uppercase; letter-spacing: .12em; margin: 0; color: var(--muted); font-weight: 700; }
+.row { display: grid; grid-template-columns: 104px 1fr; align-items: center; gap: 10px; min-width: 0; }
+.row > label, .row > .lbl { font-size: .88rem; color: var(--fg); }
+.row output { font-family: var(--f-mono); font-size: .78rem; color: var(--muted); min-width: 4ch; text-align: right; }
+.sl { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; min-width: 0; }
+input[type="range"] { width: 100%; accent-color: var(--accent); }
+input[type="color"] { width: 46px; height: 32px; border: 1px solid var(--line); border-radius: 8px; padding: 2px; background: var(--panel); cursor: pointer; }
+input[type="text"] { width: 100%; font: 500 .92rem var(--f-body); color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; min-width: 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { border: 1px solid var(--line); background: var(--bg); color: var(--fg); border-radius: 10px; padding: 7px 12px; font: 500 .9rem var(--f-body); cursor: pointer; }
+.chip.off { border-style: dashed; color: var(--muted); }
+.chip[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); color: var(--accent); }
+.fontchip { font-size: 1.3rem; padding: 3px 12px; line-height: 1.3; }
+.colors { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.sw { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--panel); box-shadow: 0 0 0 1px var(--line); cursor: pointer; padding: 0; }
+.sw[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--accent); }
+.toggle { display: flex; align-items: center; gap: 10px; font-size: .92rem; cursor: pointer; }
+.toggle input { width: 18px; height: 18px; accent-color: var(--accent); }
+.btnrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.filebtn { display: inline-flex; align-items: center; gap: 8px; border: 1px dashed var(--accent); color: var(--accent); border-radius: 10px; padding: 8px 14px; font: 600 .9rem var(--f-body); cursor: pointer; background: transparent; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.filebtn input { display: none; }
+.small-btn { border: 1px solid var(--line); background: var(--bg); color: var(--fg); border-radius: 9px; padding: 7px 12px; font: 500 .86rem var(--f-body); cursor: pointer; }
+.pad { display: grid; grid-template-columns: repeat(3, 44px); grid-template-rows: repeat(2, 40px); gap: 6px; }
+.pad button { border: 1px solid var(--line); background: var(--bg); color: var(--fg); border-radius: 9px; font: 600 1.05rem var(--f-body); cursor: pointer; }
+.pad .up { grid-column: 2; grid-row: 1; } .pad .left { grid-column: 1; grid-row: 2; } .pad .down { grid-column: 2; grid-row: 2; } .pad .right { grid-column: 3; grid-row: 2; }
+.move { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+.move .btns { display: grid; gap: 6px; }
+.go { width: 100%; border: 0; border-radius: 12px; padding: 15px; font: 700 1.02rem var(--f-display); letter-spacing: .03em; background: var(--accent); color: var(--accent-fg); cursor: pointer; }
+.go:disabled { opacity: .55; cursor: progress; }
+.status { font-size: .88rem; margin: 0; min-height: 1.3em; }
+.status.ok { color: var(--ok); } .status.err { color: var(--warn); }
+ol.steps { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; font-size: .9rem; color: var(--fg); }
+ol.steps li::marker { font-family: var(--f-mono); color: var(--muted); }
+.note { font-size: .82rem; color: var(--muted); margin: 0; }
+code { font-family: var(--f-mono); font-size: .85em; background: var(--bg); border: 1px solid var(--line); border-radius: 5px; padding: 0 4px; }
+button:focus-visible, input:focus-visible, .filebtn:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+.stack { display: grid; gap: 12px; }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Kadran Atölyesi</h1>
+    <span class="device">XIAOMI WATCH S1 ACTIVE · 466×466</span>
+  </header>
+
+  <div class="grid">
+    <section class="stage" aria-label="Önizleme">
+      <div class="watch"><canvas id="cv" width="466" height="466" aria-label="Saat yüzü önizlemesi"></canvas></div>
+      <div class="seg small" role="group" aria-label="Önizleme modu">
+        <button type="button" id="mNormal" aria-pressed="true">Normal</button>
+        <button type="button" id="mAod" aria-pressed="false">Ekran hep açık</button>
+      </div>
+      <nav class="tabs" role="tablist" aria-label="Ayar bölümleri">
+        <button type="button" role="tab" data-tab="bg">Zemin</button>
+        <button type="button" role="tab" data-tab="clock">Saat</button>
+        <button type="button" role="tab" data-tab="hands">İbreler</button>
+        <button type="button" role="tab" data-tab="info">Öğeler</button>
+        <button type="button" role="tab" data-tab="save">Kaydet</button>
+      </nav>
+    </section>
+
+    <div class="controls">
+      <!-- ARKA PLAN -->
+      <section class="panel" data-panel="bg" role="tabpanel">
+        <div class="group">
+          <h3>Arka plan türü</h3>
+          <div class="chips" role="group" aria-label="Arka plan türü">
+            <button type="button" class="chip" data-bg="photo">Fotoğraf</button>
+            <button type="button" class="chip" data-bg="solid">Düz renk</button>
+            <button type="button" class="chip" data-bg="glow">Işıltı</button>
+          </div>
+        </div>
+        <div class="group" id="photoBox" hidden>
+          <h3>Fotoğraf</h3>
+          <label class="filebtn"><input type="file" id="photo" accept="image/*">Fotoğraf seç</label>
+          <p class="note">Fotoğrafı kaydırmak için önizlemede sürükle.</p>
+          <div class="row"><label for="zoom">Yakınlaştır</label><div class="sl"><input type="range" id="zoom" min="100" max="300" value="100"><output id="zoomO">1.0×</output></div></div>
+          <div class="row"><label for="dim">Karartma</label><div class="sl"><input type="range" id="dim" min="0" max="80" value="30"><output id="dimO">30%</output></div></div>
+        </div>
+        <div class="group" id="colorBox">
+          <h3>Renkler</h3>
+          <div class="colors"><input type="color" id="bg1" value="#14325c" aria-label="Ana renk"><input type="color" id="bg2" value="#04070d" aria-label="Kenar rengi"></div>
+        </div>
+      </section>
+
+      <!-- SAAT -->
+      <section class="panel" data-panel="clock" role="tabpanel" hidden>
+        <div class="group">
+          <h3>Saat tipi</h3>
+          <div class="seg" role="group" aria-label="Saat tipi">
+            <button type="button" data-type="digital">Dijital</button>
+            <button type="button" data-type="analog">Analog</button>
+          </div>
+        </div>
+        <div class="group" id="fontGroup">
+          <h3 id="fontTitle">Yazı tipi</h3>
+          <div class="chips" id="fonts" role="group" aria-label="Yazı tipi"></div>
+          <div class="row" id="tsizeRow"><label for="tsize">Boyut</label><div class="sl"><input type="range" id="tsize" min="70" max="200" value="140"><output id="tsizeO">140</output></div></div>
+        </div>
+        <div class="group" id="dialGroup">
+          <h3>Kadran</h3>
+          <div class="chips" role="group" aria-label="Kadran işaretleri">
+            <button type="button" class="chip" data-dial="ticks">Çizgiler</button>
+            <button type="button" class="chip" data-dial="numbers">Rakamlar</button>
+            <button type="button" class="chip" data-dial="plain">Sade</button>
+          </div>
+          <div class="row"><label for="ring">Kadran boyutu</label><div class="sl"><input type="range" id="ring" min="85" max="100" value="100"><output id="ringO">100%</output></div></div>
+          <label class="toggle"><input type="checkbox" id="miniClock">İçinde küçük dijital saat de olsun</label>
+          <p class="note">Küçük saatin yerini ve boyutunu Öğeler sekmesinden ayarlarsın.</p>
+        </div>
+        <div class="group">
+          <h3 id="tcolorTitle">Rakam rengi</h3>
+          <div class="colors" id="timeColors"></div>
+          <p class="note" id="tcolorNote">İbrelerin rengi İbreler sekmesinden ayrıca seçilir.</p>
+        </div>
+        <div class="group">
+          <label class="toggle"><input type="checkbox" id="shadow" checked>Gölge ekle</label>
+        </div>
+      </section>
+
+      <!-- IBRELER -->
+      <section class="panel" data-panel="hands" role="tabpanel" hidden>
+        <div class="group">
+          <h3>İbre biçimi</h3>
+          <div class="chips" role="group" aria-label="İbre biçimi">
+            <button type="button" class="chip" data-hand="thin">İnce</button>
+            <button type="button" class="chip" data-hand="bold">Kalın</button>
+            <button type="button" class="chip" data-hand="sword">Kılıç</button>
+            <button type="button" class="chip" data-hand="custom">Resim</button>
+          </div>
+        </div>
+        <div class="group" id="customHandBox" hidden>
+          <h3>Resimli ibre</h3>
+          <div class="seg" role="group" aria-label="Düzenlenen ibre">
+            <button type="button" data-edit="8">Akrep</button>
+            <button type="button" data-edit="16">Yelkovan</button>
+          </div>
+          <div class="btnrow">
+            <label class="filebtn"><input type="file" id="hImg" accept="image/*"><span id="hImgL">Akrep resmi seç</span></label>
+            <button type="button" class="small-btn" id="hDel">Resmi kaldır</button>
+          </div>
+          <div class="row"><label for="hs">Boyut</label><div class="sl"><input type="range" id="hs" min="30" max="220" value="100"><output id="hsO">100%</output></div></div>
+          <div class="row"><label for="ht">Eğim</label><div class="sl"><input type="range" id="ht" min="-30" max="30" value="0"><output id="htO">0°</output></div></div>
+          <div class="btnrow">
+            <div class="seg small" role="group" aria-label="İbre önizlemesi">
+              <button type="button" data-hview="align">12'de hizala</button>
+              <button type="button" data-hview="live">Saatte gör</button>
+            </div>
+            <button type="button" class="small-btn" id="hReset">Konumu sıfırla</button>
+          </div>
+          <p class="note">Hizalama görünümünde ibre 12'yi gösterir. Kırmızı artı, ibrenin döndüğü merkezdir: resmi önizlemede sürükleyerek artının üstüne getir.</p>
+          <label class="toggle"><input type="checkbox" id="knockWhite" checked>Beyaz arka planı sil</label>
+        </div>
+        <div class="group">
+          <h3>İbre rengi</h3>
+          <div class="colors" id="handColors"></div>
+          <p class="note" id="handColorNote" hidden>Resim seçilen ibre kendi rengini kullanır; bu renk resimsiz ibreye ve ortadaki pule uygulanır.</p>
+        </div>
+        <div class="group">
+          <h3>Saniye ibresi</h3>
+          <label class="toggle"><input type="checkbox" id="seconds" checked>Saniye ibresini göster</label>
+          <div class="colors" id="secColors"></div>
+        </div>
+      </section>
+
+      <!-- GOSTERGELER -->
+      <section class="panel" data-panel="info" role="tabpanel" hidden>
+        <div class="group">
+          <h3>Görünenler</h3>
+          <label class="toggle"><input type="checkbox" id="showDate" checked>Gün ve tarih</label>
+          <label class="toggle"><input type="checkbox" id="showBatt" checked>Pil yüzdesi</label>
+          <label class="toggle"><input type="checkbox" id="showSteps">Adım sayısı</label>
+          <label class="toggle" id="miniToggle"><input type="checkbox" id="mini">Küçük dijital saat</label>
+        </div>
+        <div class="group">
+          <h3>Yerleşim</h3>
+          <p class="note">Önizlemede bir öğeye dokunup sürükle ya da aşağıdan seçip oklarla kaydır. Kesik çizgili olanlar kapalıdır; dokununca açılır.</p>
+          <div class="chips" id="elChips" role="group" aria-label="Taşınacak öğe"></div>
+          <div class="move">
+            <div class="pad" aria-label="Kaydır">
+              <button type="button" class="up" data-nudge="0,-1" aria-label="Yukarı">↑</button>
+              <button type="button" class="left" data-nudge="-1,0" aria-label="Sola">←</button>
+              <button type="button" class="down" data-nudge="0,1" aria-label="Aşağı">↓</button>
+              <button type="button" class="right" data-nudge="1,0" aria-label="Sağa">→</button>
+            </div>
+            <div class="btns">
+              <button type="button" class="small-btn" id="elCenter">Yatayda ortala</button>
+              <button type="button" class="small-btn" id="elReset">Varsayılan yere al</button>
+            </div>
+          </div>
+        </div>
+        <div class="group">
+          <h3>Görünüm</h3>
+          <div class="row"><span class="lbl">Yazı rengi</span><div class="colors" id="subColors"></div></div>
+          <div class="row"><label for="ssize">Yazı boyutu</label><div class="sl"><input type="range" id="ssize" min="22" max="48" value="32"><output id="ssizeO">32</output></div></div>
+          <div class="row" id="msizeRow"><label for="msize">Küçük saat</label><div class="sl"><input type="range" id="msize" min="32" max="80" value="52"><output id="msizeO">52</output></div></div>
+          <p class="note" id="miniNote">Küçük saat, Saat sekmesindeki yazı tipini ve rakam rengini kullanır.</p>
+        </div>
+      </section>
+
+      <!-- KAYDET -->
+      <section class="panel" data-panel="save" role="tabpanel" hidden>
+        <div class="group">
+          <div class="row"><label for="name">Kadran adı</label><input type="text" id="name" value="Gece Mavisi" maxlength="40"></div>
+          <button type="button" class="go" id="build">Saat yüzünü oluştur</button>
+          <p class="status" id="status" role="status"></p>
+          <button type="button" class="small-btn" id="openGB" hidden>Gadgetbridge ile tekrar aç</button>
+        </div>
+        <div class="group">
+          <h3>Saate yükleme</h3>
+          <ol class="steps">
+            <li id="step1">İnen <code>.zip</code> dosyasını dosya yöneticisiyle aç, içindeki <code>.bin</code> dosyasını çıkar.</li>
+            <li id="step2">Saat Gadgetbridge'e bağlıyken <code>.bin</code> dosyasına dokun ve Gadgetbridge ile aç.</li>
+            <li>Yükleyici ekranında <b>Yükle</b>'ye bas; saat yakında dursun.</li>
+            <li>Saatte kadranlar listesinde yeni yüzü seç.</li>
+          </ol>
+          <p class="note">Her oluşturma yeni bir kimlik alır, böylece aynı tasarımın farklı sürümleri saatte çakışmaz. Dijital saat 24 saat biçiminde gösterilir.</p>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+/*WFBUILD*/
+</script>
+<script>
+(function () {
+  'use strict';
+  var W = 466, C = 233;
+  var APP = !!window.KadranApp;
+  var STANDALONE = !APP && !(window.claude && window.claude.use);
+  var FONTS = [
+    { id: 'bebas', fam: 'Bebas Neue', wt: 400, label: '10:08' },
+    { id: 'orbitron', fam: 'Orbitron', wt: 700, label: '10:08' },
+    { id: 'bodoni', fam: 'Bodoni Moda', wt: 700, label: '10:08' },
+    { id: 'chakra', fam: 'Chakra Petch', wt: 700, label: '10:08' },
+    { id: 'rubik', fam: 'Rubik Mono One', wt: 400, label: '10:08' },
+    { id: 'pixel', fam: 'Silkscreen', wt: 400, label: '10:08' }
+  ];
+  var SUB_FONT = { fam: 'Archivo', wt: 700 };
+  var TIME_COLORS = ['#ffffff', '#ffd27a', '#8fe3ff', '#ff8f7a', '#b9f27c', '#c8b6ff'];
+  var SUB_COLORS = ['#c9d3e3', '#ffffff', '#ffd27a', '#8fe3ff', '#ff8f7a', '#9aa4b5'];
+  var SEC_COLORS = ['#ff5a3c', '#ffd27a', '#8fe3ff', '#ffffff', '#b9f27c'];
+  var DAYS = ['PAZ', 'PZT', 'SAL', 'ÇAR', 'PER', 'CUM', 'CMT'];
+  var EL_NAMES = { time: 'Saat', date: 'Tarih', batt: 'Pil', steps: 'Adım', mini: 'Küçük saat' };
+
+  function defHand() { return { s: 100, x: 0, y: 0, t: 0 }; }
+  var st = {
+    bg: 'glow', bg1: '#14325c', bg2: '#04070d', zoom: 1, dim: 30, ox: 0, oy: 0,
+    font: 'bebas', tcolor: '#ffffff', hcolor: null, tsize: 140, tpos: 0, shadow: true,
+    scolor: '#c9d3e3', showDate: true, showBatt: true, ssize: 32, name: 'Gece Mavisi',
+    type: 'digital', dial: 'ticks', hand: 'thin', seconds: true, seccolor: '#ff5a3c', ring: 100,
+    showSteps: false, mini: false, minipos: 'bottom', msize: 52, knockWhite: true,
+    pos: {}, hc: { 8: defHand(), 16: defHand() }
+  };
+  try { var saved = JSON.parse(localStorage.getItem('kadran-ayar') || 'null'); if (saved) Object.assign(st, saved); } catch (e) {}
+  if (!st.hcolor) st.hcolor = st.tcolor;
+  if (!st.pos || typeof st.pos !== 'object') st.pos = {};
+  if (!st.hc || !st.hc[8] || !st.hc[16]) st.hc = { 8: defHand(), 16: defHand() };
+  if (st.tpos && !st.pos.time) { st.pos.time = { x: C, y: C + st.tpos }; st.tpos = 0; }
+
+  var photo = null, mode = 'normal', tab = 'bg', sel = null, editHand = 8, hview = 'align';
+  try { tab = localStorage.getItem('kadran-sekme') || 'bg'; } catch (e) {}
+  var handImgs = { 8: null, 16: null }, handCache = {};
+
+  var $ = function (id) { return document.getElementById(id); };
+  var cv = $('cv'), cx = cv.getContext('2d');
+
+  function mk(w, h) { var c = document.createElement('canvas'); c.width = Math.max(1, Math.ceil(w)); c.height = Math.max(1, Math.ceil(h)); return c; }
+  function fontOf(id) { for (var i = 0; i < FONTS.length; i++) if (FONTS[i].id === id) return FONTS[i]; return FONTS[0]; }
+  function dimColor(hex, k) {
+    var n = parseInt(hex.slice(1), 16), r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+    return 'rgb(' + Math.round(r * k) + ',' + Math.round(g * k) + ',' + Math.round(b * k) + ')';
+  }
+
+  // ---- Olculer
+  function measureDigits(f, size, maxTotal) {
+    var tmp = mk(4, 4).getContext('2d'), dig, colonW, total;
+    for (var tries = 0; tries < 6; tries++) {
+      tmp.font = f.wt + ' ' + size + 'px "' + f.fam + '"';
+      var maxW = 0, asc = 0, desc = 0, m;
+      for (var d = 0; d < 10; d++) {
+        m = tmp.measureText(String(d));
+        maxW = Math.max(maxW, m.width, m.actualBoundingBoxLeft + m.actualBoundingBoxRight);
+        asc = Math.max(asc, m.actualBoundingBoxAscent); desc = Math.max(desc, m.actualBoundingBoxDescent);
+      }
+      var pad = Math.ceil(size * 0.04) + 2;
+      dig = { w: Math.ceil(maxW) + pad * 2, h: Math.ceil(asc + desc) + pad * 2, asc: asc, pad: pad, font: tmp.font, size: size };
+      colonW = Math.ceil(tmp.measureText(':').width + size * 0.08);
+      total = dig.w * 4 + colonW;
+      if (total <= maxTotal) break;
+      size = Math.floor(size * maxTotal / total);
+    }
+    return { dig: dig, colonW: colonW, total: total };
+  }
+  function timeRow(M, tx, ty) {
+    var d = M.dig;
+    return {
+      dig: d, top: ty, bottom: ty + d.h,
+      digits: [{ x: tx, y: ty }, { x: tx + d.w, y: ty }, { x: tx + d.w * 2 + M.colonW, y: ty }, { x: tx + d.w * 3 + M.colonW, y: ty }],
+      colon: { x: tx + d.w * 2 + M.colonW / 2, y: ty + d.pad + d.asc }
+    };
+  }
+  // Ogenin kutusu: kullanici bir yer sectiyse orasi, yoksa varsayilan merkez. Ekran disina tasmaz.
+  function place(name, w, h, defCx, defCy) {
+    var p = st.pos[name], cx0 = p ? p.x : defCx, cy0 = p ? p.y : defCy;
+    var x = Math.round(Math.min(Math.max(cx0 - w / 2, 0), W - w));
+    var y = Math.round(Math.min(Math.max(cy0 - h / 2, 0), W - h));
+    return { x: x, y: y, w: Math.ceil(w), h: Math.ceil(h) };
+  }
+
+  // ---- Yerlesim: onizleme ve derleme ayni sonucu kullanir
+  function layout() {
+    var f = fontOf(st.font), analog = st.type === 'analog';
+    var L = { font: f, boxes: {} };
+    var timeBox;
+    if (!analog) {
+      var main = measureDigits(f, st.tsize, 440);
+      timeBox = place('time', main.total, main.dig.h, C, C);
+      var T = timeRow(main, timeBox.x, timeBox.y);
+      L.dig = T.dig; L.digits = T.digits; L.colon = T.colon; L.size = main.dig.size;
+      L.boxes.time = timeBox;
+    }
+    if (analog && st.mini) {
+      var mm = measureDigits(f, st.msize, 230);
+      var mb = place('mini', mm.total, mm.dig.h, C, C + (st.minipos === 'top' ? -58 : 58));
+      L.mini = timeRow(mm, mb.x, mb.y);
+      L.boxes.mini = mb;
+    }
+    var tmp = mk(4, 4).getContext('2d');
+    var sf = SUB_FONT.wt + ' ' + st.ssize + 'px "' + SUB_FONT.fam + '"';
+    tmp.font = sf;
+    var sp = 4, sh = Math.ceil(st.ssize * 1.25) + sp * 2;
+    L.sub = { font: sf, h: sh, pad: sp };
+
+    var wdW = 0; DAYS.forEach(function (n) { wdW = Math.max(wdW, tmp.measureText(n).width); });
+    wdW = Math.ceil(wdW) + sp * 2;
+    var dayW = Math.ceil(tmp.measureText('00').width) + sp * 2;
+    var gap = Math.round(st.ssize * 0.35);
+    var dateW = wdW + gap + dayW;
+    var dateCy = analog ? C - 112 : timeBox.y - Math.round(st.ssize * 0.25) - sh / 2;
+    var db = place('date', dateW, sh, C, dateCy);
+    L.weekday = { x: db.x, y: db.y, w: wdW };
+    L.day = { x: db.x + wdW + gap, y: db.y, w: dayW };
+    if (st.showDate) L.boxes.date = db;
+
+    // Pil ve adim varsayilan olarak alt satirda yan yana
+    var rowCy = analog ? C + 112 : timeBox.y + timeBox.h + Math.round(st.ssize * 0.25) + sh / 2;
+    var batW = Math.ceil(tmp.measureText('%100').width) + sp * 2;
+    var sdW = 0; for (var d = 0; d < 10; d++) sdW = Math.max(sdW, tmp.measureText(String(d)).width);
+    sdW = Math.ceil(sdW);
+    var iconW = Math.round(st.ssize * 0.8), iconGap = Math.round(st.ssize * 0.2);
+    var stepsW = iconW + iconGap + sdW * 5 + sp;
+    var items = [];
+    if (st.showBatt) items.push(['batt', batW]);
+    if (st.showSteps) items.push(['steps', stepsW]);
+    var rowGap = Math.round(st.ssize * 0.7);
+    var rowTotal = items.reduce(function (a, it) { return a + it[1]; }, 0) + rowGap * Math.max(0, items.length - 1);
+    var x = C - rowTotal / 2, defX = { batt: C, steps: C };
+    items.forEach(function (it) { defX[it[0]] = x + it[1] / 2; x += it[1] + rowGap; });
+    var bb = place('batt', batW, sh, defX.batt, rowCy);
+    L.batt = { x: bb.x, y: bb.y, w: batW };
+    if (st.showBatt) L.boxes.batt = bb;
+    var sb = place('steps', stepsW, sh, defX.steps, rowCy);
+    L.steps = { x: sb.x + iconW + iconGap, y: sb.y, digW: sdW, iconX: sb.x, iconW: iconW };
+    if (st.showSteps) L.boxes.steps = sb;
+    return L;
+  }
+
+  // ---- Analog kadran
+  function ringR() { return Math.round(232 * st.ring / 100); }
+  function drawDial(g, aod) {
+    var OR = ringR(), col = aod ? dimColor(st.tcolor, 0.4) : st.tcolor;
+    g.save(); g.translate(C, C); g.fillStyle = col; g.strokeStyle = col; g.lineCap = 'round';
+    if (st.shadow && !aod) { g.shadowColor = 'rgba(0,0,0,.5)'; g.shadowBlur = 4; }
+    if (st.dial === 'ticks' || st.dial === 'numbers') {
+      for (var i = 0; i < 60; i++) {
+        var hour = i % 5 === 0;
+        if (aod && !hour) continue;
+        if (st.dial === 'numbers' && hour) continue;
+        g.save(); g.rotate(i * Math.PI / 30);
+        g.globalAlpha = hour ? 1 : 0.55;
+        g.lineWidth = hour ? 6 : 2;
+        g.beginPath(); g.moveTo(0, -(OR - (hour ? 28 : 13))); g.lineTo(0, -(OR - 4)); g.stroke();
+        g.restore();
+      }
+    }
+    if (st.dial === 'numbers') {
+      g.font = '700 40px "' + SUB_FONT.fam + '"'; g.textAlign = 'center'; g.textBaseline = 'middle';
+      for (var n = 1; n <= 12; n++) {
+        var a = n * Math.PI / 6;
+        g.fillText(String(n), Math.sin(a) * (OR - 36), -Math.cos(a) * (OR - 36) + 2);
+      }
+    }
+    g.restore();
+  }
+
+  // ---- Ibreler
+  var HANDS = {
+    thin: { 8: [9, 118, 20], 16: [6, 178, 24] },
+    bold: { 8: [18, 112, 22], 16: [13, 172, 26] },
+    sword: { 8: [20, 118, 18], 16: [15, 180, 22] }
+  };
+  // Yuklenen ibre resmi: istenirse beyazi sil, bos kenarlari kirp
+  function preparedHand(kind) {
+    var img = handImgs[kind]; if (!img) return null;
+    var key = kind + ':' + st.knockWhite;
+    if (handCache[key] && handCache[key].img === img) return handCache[key].c;
+    var sc = Math.min(1, 600 / Math.max(img.width, img.height));
+    var w = Math.max(1, Math.round(img.width * sc)), h = Math.max(1, Math.round(img.height * sc));
+    var c = mk(w, h), g = c.getContext('2d'); g.drawImage(img, 0, 0, w, h);
+    var id = g.getImageData(0, 0, w, h), d = id.data, x0 = w, y0 = h, x1 = -1, y1 = -1;
+    for (var y = 0; y < h; y++) for (var x = 0; x < w; x++) {
+      var i = (y * w + x) * 4;
+      if (st.knockWhite) {
+        var mn = Math.min(d[i], d[i + 1], d[i + 2]);
+        if (mn > 235) d[i + 3] = 0; else if (mn > 210) d[i + 3] = Math.round(d[i + 3] * (235 - mn) / 25);
+      }
+      if (d[i + 3] > 8) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    }
+    if (x1 < 0) return null;
+    g.putImageData(id, 0, 0);
+    var t = mk(x1 - x0 + 1, y1 - y0 + 1); t.getContext('2d').drawImage(c, -x0, -y0);
+    handCache[key] = { img: img, c: t };
+    return t;
+  }
+  // Resimli ibre: boyut, kaydirma ve egim uygulanir; gorsel, donme noktasini da icine alan en kucuk kutudur
+  function drawCustomHand(kind, src, aod) {
+    var P = st.hc[kind], k = ringR() / 222, len = HANDS.thin[kind][1] * k;
+    var s0 = len / (src.height * 0.88);
+    if (src.width * s0 > 140) s0 = 140 / src.width;
+    var s = s0 * P.s / 100, dw = src.width * s, dh = src.height * s;
+    var left = -dw / 2 + P.x, top = -dh * 0.88 + P.y, t = P.t * Math.PI / 180, co = Math.cos(t), si = Math.sin(t);
+    var xs = [0], ys = [0];
+    [[left, top], [left + dw, top], [left, top + dh], [left + dw, top + dh]].forEach(function (p) {
+      xs.push(p[0] * co - p[1] * si); ys.push(p[0] * si + p[1] * co);
+    });
+    var pad = 8;
+    var minX = Math.floor(Math.min.apply(null, xs)) - pad, maxX = Math.ceil(Math.max.apply(null, xs)) + pad;
+    var minY = Math.floor(Math.min.apply(null, ys)) - pad, maxY = Math.ceil(Math.max.apply(null, ys)) + pad;
+    var c = mk(maxX - minX, maxY - minY), g = c.getContext('2d');
+    g.translate(-minX, -minY); g.rotate(t);
+    if (st.shadow && !aod) { g.shadowColor = 'rgba(0,0,0,.45)'; g.shadowBlur = 5; }
+    g.imageSmoothingQuality = 'high';
+    g.drawImage(src, left, top, dw, dh);
+    if (aod) { g.setTransform(1, 0, 0, 1, 0, 0); g.shadowColor = 'transparent'; g.globalCompositeOperation = 'source-atop'; g.fillStyle = 'rgba(0,0,0,.5)'; g.fillRect(0, 0, c.width, c.height); }
+    return { canvas: c, px: -minX, py: -minY };
+  }
+  // Cizilen ibre: yukari bakar, donme noktasi gorselin ortasinda
+  function drawHand(kind, color, aod) {
+    var sec = kind === 0x18;
+    if (!sec && st.hand === 'custom') { var src = preparedHand(kind); if (src) return drawCustomHand(kind, src, aod); }
+    var style = st.hand === 'custom' ? 'thin' : st.hand;
+    var spec = sec ? [3, 196, 44] : HANDS[style][kind];
+    var k = ringR() / 222;
+    var wdt = spec[0], len = Math.round(spec[1] * k), tail = Math.round(spec[2] * k), pad = 8;
+    var R = len + pad, cw = Math.ceil((Math.max(wdt, sec ? 14 : wdt) + pad * 2) / 2) * 2;
+    var c = mk(cw, R * 2), g = c.getContext('2d');
+    g.translate(cw / 2, R); g.fillStyle = color; g.strokeStyle = color;
+    if (st.shadow) { g.shadowColor = 'rgba(0,0,0,.45)'; g.shadowBlur = 5; }
+    if (sec) {
+      g.fillRect(-1.5, -len, 3, len + tail);
+      g.beginPath(); g.arc(0, tail - 4, 6, 0, Math.PI * 2); g.fill();
+    } else if (style === 'sword') {
+      g.beginPath();
+      g.moveTo(-wdt / 2, tail * 0.2); g.lineTo(-wdt / 2, -len * 0.2); g.lineTo(0, -len);
+      g.lineTo(wdt / 2, -len * 0.2); g.lineTo(wdt / 2, tail * 0.2); g.lineTo(0, tail);
+      g.closePath(); g.fill();
+    } else {
+      var r = wdt / 2;
+      g.beginPath();
+      g.moveTo(-r, tail - r); g.lineTo(-r, -len + r); g.arc(0, -len + r, r, Math.PI, 0);
+      g.lineTo(r, tail - r); g.arc(0, tail - r, r, 0, Math.PI); g.closePath(); g.fill();
+      if (style === 'bold') {
+        g.shadowColor = 'transparent'; g.fillStyle = 'rgba(0,0,0,.35)';
+        g.fillRect(-r * 0.35, -len + r * 3, r * 0.7, len * 0.55);
+      }
+    }
+    return { canvas: c, px: cw / 2, py: R };
+  }
+  function drawCap(color, accent) {
+    var c = mk(26, 26), g = c.getContext('2d');
+    g.fillStyle = color; g.beginPath(); g.arc(13, 13, 10, 0, Math.PI * 2); g.fill();
+    g.fillStyle = accent; g.beginPath(); g.arc(13, 13, 4, 0, Math.PI * 2); g.fill();
+    return c;
+  }
+  function handSet(aod) {
+    var col = aod ? dimColor(st.hcolor, 0.5) : st.hcolor;
+    var list = [[0x08, drawHand(0x08, col, aod)], [0x10, drawHand(0x10, col, aod)]];
+    if (st.seconds && !aod) list.push([0x18, drawHand(0x18, st.seccolor)]);
+    var capAccent = st.seconds && !aod ? st.seccolor : (aod ? '#000' : 'rgba(0,0,0,.6)');
+    return { hands: list, cap: drawCap(col, capAccent) };
+  }
+  function drawHandsAt(g, set, h, m, s) {
+    var ang = { 8: ((h % 12) + m / 60) * 30, 16: (m + s / 60) * 6, 24: s * 6 };
+    set.hands.forEach(function (p) {
+      g.save(); g.translate(C, C); g.rotate(ang[p[0]] * Math.PI / 180);
+      g.drawImage(p[1].canvas, -p[1].px, -p[1].py); g.restore();
+    });
+    g.drawImage(set.cap, C - 13, C - 13);
+  }
+
+  // ---- Kareler
+  function drawDigit(D, n, color) {
+    var c = mk(D.w, D.h), g = c.getContext('2d');
+    g.font = D.font; g.textAlign = 'center'; g.textBaseline = 'alphabetic'; g.fillStyle = color;
+    if (st.shadow) { g.shadowColor = 'rgba(0,0,0,.55)'; g.shadowBlur = Math.round(D.size * 0.05); g.shadowOffsetY = Math.round(D.size * 0.02); }
+    g.fillText(String(n), D.w / 2, D.pad + D.asc);
+    return c;
+  }
+  function drawColon(g, R, color, aod) {
+    g.save(); g.font = R.dig.font; g.textAlign = 'center'; g.textBaseline = 'alphabetic'; g.fillStyle = color;
+    if (st.shadow && !aod) { g.shadowColor = 'rgba(0,0,0,.55)'; g.shadowBlur = Math.round(R.dig.size * 0.05); g.shadowOffsetY = Math.round(R.dig.size * 0.02); }
+    g.fillText(':', R.colon.x, R.colon.y); g.restore();
+  }
+  function frameStepDigit(L, n, color) {
+    var c = mk(L.steps.digW, L.sub.h), g = c.getContext('2d');
+    g.font = L.sub.font; g.textBaseline = 'middle'; g.textAlign = 'center'; g.fillStyle = color;
+    if (st.shadow) { g.shadowColor = 'rgba(0,0,0,.5)'; g.shadowBlur = 3; g.shadowOffsetY = 1; }
+    g.fillText(String(n), L.steps.digW / 2, L.sub.h / 2 + 1);
+    return c;
+  }
+  // Ayak izi simgesi (arka plana islenir)
+  function drawStepIcon(g, L, color) {
+    var s = L.steps.iconW, x = L.steps.iconX, y = L.steps.y + (L.sub.h - s) / 2;
+    g.save(); g.fillStyle = color;
+    function foot(cx0, cy0, r) {
+      g.beginPath(); g.ellipse(cx0, cy0, r * 0.42, r * 0.62, -0.15, 0, Math.PI * 2); g.fill();
+      g.beginPath(); g.ellipse(cx0 + r * 0.05, cy0 + r * 0.95, r * 0.3, r * 0.26, 0, 0, Math.PI * 2); g.fill();
+    }
+    foot(x + s * 0.3, y + s * 0.3, s * 0.38);
+    foot(x + s * 0.72, y + s * 0.12, s * 0.38);
+    g.restore();
+  }
+  function drawStepsValue(g, L, v, color) {
+    String(v).split('').forEach(function (ch, i) { g.drawImage(frameStepDigit(L, +ch, color), L.steps.x + i * L.steps.digW, L.steps.y); });
+  }
+  function digitsFor(h, m) { var hh = ('0' + h).slice(-2), mm = ('0' + m).slice(-2); return [+hh[0], +hh[1], +mm[0], +mm[1]]; }
+  function drawText(L, w, txt, align, color) {
+    var c = mk(w, L.sub.h), g = c.getContext('2d');
+    g.font = L.sub.font; g.textBaseline = 'middle'; g.fillStyle = color; g.textAlign = align;
+    if (st.shadow) { g.shadowColor = 'rgba(0,0,0,.5)'; g.shadowBlur = 3; g.shadowOffsetY = 1; }
+    var x = align === 'right' ? w - L.sub.pad : align === 'left' ? L.sub.pad : w / 2;
+    g.fillText(txt, x, L.sub.h / 2 + 1);
+    return c;
+  }
+  function frameWeekday(L, i, color) { return drawText(L, L.weekday.w, DAYS[i], 'right', color); }
+  function frameDay(L, i, color) { return drawText(L, L.day.w, i ? String(i) : '', 'left', color); }
+  function frameBatt(L, i, color) { return drawText(L, L.batt.w, '%' + i, 'center', color); }
+
+  function drawBackground(L, aod) {
+    var c = mk(W, W), g = c.getContext('2d');
+    if (aod) {
+      g.fillStyle = '#000'; g.fillRect(0, 0, W, W);
+    } else if (st.bg === 'photo' && photo) {
+      g.fillStyle = '#000'; g.fillRect(0, 0, W, W);
+      var s = Math.max(W / photo.width, W / photo.height) * st.zoom;
+      var dw = photo.width * s, dh = photo.height * s;
+      g.drawImage(photo, C - dw / 2 + st.ox, C - dh / 2 + st.oy, dw, dh);
+      if (st.dim) { g.fillStyle = 'rgba(0,0,0,' + st.dim / 100 + ')'; g.fillRect(0, 0, W, W); }
+    } else if (st.bg === 'solid') {
+      g.fillStyle = st.bg1; g.fillRect(0, 0, W, W);
+    } else {
+      var gr = g.createRadialGradient(C, C * 0.82, 10, C, C, C * 1.05);
+      gr.addColorStop(0, st.bg1); gr.addColorStop(1, st.bg2);
+      g.fillStyle = gr; g.fillRect(0, 0, W, W);
+    }
+    var tcol = aod ? dimColor(st.tcolor, 0.5) : st.tcolor;
+    if (st.showSteps && !aod) drawStepIcon(g, L, st.scolor);
+    if (st.type === 'analog') {
+      drawDial(g, aod);
+      if (L.mini) drawColon(g, L.mini, tcol, aod);
+      return c;
+    }
+    drawColon(g, L, tcol, aod);
+    return c;
+  }
+
+  // ---- Onizleme
+  var raf = 0;
+  function render() { if (!raf) raf = requestAnimationFrame(function () { raf = 0; paint(); }); }
+  function aligning() { return tab === 'hands' && st.type === 'analog' && st.hand === 'custom' && hview === 'align' && mode === 'normal'; }
+  function paint() {
+    var aod = mode === 'aod', L = layout();
+    var tc = aod ? dimColor(st.tcolor, 0.5) : st.tcolor, sc = aod ? dimColor(st.scolor, 0.5) : st.scolor;
+    cx.clearRect(0, 0, W, W);
+    cx.drawImage(drawBackground(L, aod), 0, 0);
+    var now = new Date();
+    var ds = digitsFor(now.getHours(), now.getMinutes()), R = st.type === 'analog' ? L.mini : L;
+    if (R) for (var i = 0; i < 4; i++) cx.drawImage(drawDigit(R.dig, ds[i], tc), R.digits[i].x, R.digits[i].y);
+    if (st.showDate) {
+      cx.drawImage(frameWeekday(L, now.getDay(), sc), L.weekday.x, L.weekday.y);
+      cx.drawImage(frameDay(L, now.getDate(), sc), L.day.x, L.day.y);
+    }
+    if (st.showBatt && !aod) cx.drawImage(frameBatt(L, 85, sc), L.batt.x, L.batt.y);
+    if (st.showSteps && !aod) drawStepsValue(cx, L, 8432, sc);
+    if (st.type === 'analog') {
+      if (aligning()) {
+        var h = drawHand(editHand, st.hcolor, false);
+        cx.save(); cx.globalAlpha = 0.2; cx.fillStyle = '#ffffff'; cx.fillRect(C - 1, 12, 2, C - 12); cx.restore();
+        cx.drawImage(h.canvas, C - h.px, C - h.py);
+        cx.save(); cx.strokeStyle = '#ff3b30'; cx.lineWidth = 3;
+        cx.beginPath(); cx.moveTo(C - 12, C); cx.lineTo(C + 12, C); cx.moveTo(C, C - 12); cx.lineTo(C, C + 12); cx.stroke(); cx.restore();
+      } else {
+        drawHandsAt(cx, handSet(aod), now.getHours(), now.getMinutes(), now.getSeconds());
+      }
+    }
+    if (tab === 'info' && !aod && sel && L.boxes[sel]) {
+      var b = L.boxes[sel];
+      cx.save(); cx.strokeStyle = '#7d9bff'; cx.lineWidth = 3; cx.setLineDash([8, 6]);
+      cx.strokeRect(b.x - 4, b.y - 4, b.w + 8, b.h + 8); cx.restore();
+    }
+    lastL = L;
+    try { localStorage.setItem('kadran-ayar', JSON.stringify(st)); } catch (e) {}
+  }
+  var lastL = null;
+
+  // ---- Derleme
+  function bgra(canvas) {
+    var d = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
+    var o = new Uint8Array(d.length);
+    for (var i = 0; i < d.length; i += 4) { o[i] = d[i + 2]; o[i + 1] = d[i + 1]; o[i + 2] = d[i]; o[i + 3] = d[i + 3]; }
+    return o;
+  }
+  function list(n, fn) { var a = []; for (var i = 0; i < n; i++) a.push(fn(i)); return a; }
+
+  function buildSlot(aod) {
+    var B = window.WFBuild, L = layout();
+    var tc = aod ? dimColor(st.tcolor, 0.5) : st.tcolor, sc = aod ? dimColor(st.scolor, 0.5) : st.scolor;
+    var slot = { elements: [], images: [], imageLists: [], widgets: [] };
+    slot.images.push(B.encImage(W, W, bgra(drawBackground(L, aod))));
+    slot.elements.push(B.encElement(0x02000000, 0, 0));
+    function addWidget(blob, x, y) {
+      var wid = 0x07000000 + slot.widgets.length;
+      slot.widgets.push(blob); slot.elements.push(B.encElement(wid, x, y));
+    }
+    function addImage(canvas) {
+      slot.images.push(B.encImage(canvas.width, canvas.height, bgra(canvas)));
+      return 0x02000000 + slot.images.length - 1;
+    }
+    var analog = st.type === 'analog';
+    var R = analog ? L.mini : L;
+    if (R) {
+      var digitFrames = list(10, function (i) { return bgra(drawDigit(R.dig, i, tc)); });
+      var did = 0x03000000 + slot.imageLists.length;
+      slot.imageLists.push(B.encImageList(R.dig.w, R.dig.h, digitFrames));
+      var srcs = [B.SRC.HOUR_TENS, B.SRC.HOUR_ONES, B.SRC.MIN_TENS, B.SRC.MIN_ONES];
+      srcs.forEach(function (src, i) { addWidget(B.encDigitWidget(src, did), R.digits[i].x, R.digits[i].y); });
+    }
+    function addList(frames, w, src, x, y) {
+      var lid = 0x03000000 + slot.imageLists.length;
+      slot.imageLists.push(B.encImageList(w, L.sub.h, frames));
+      addWidget(B.encListWidget(src, lid, list(frames.length, function (i) { return i; })), x, y);
+    }
+    if (st.showDate) {
+      addList(list(7, function (i) { return bgra(frameWeekday(L, i, sc)); }), L.weekday.w, B.SRC.WEEKDAY, L.weekday.x, L.weekday.y);
+      addList(list(32, function (i) { return bgra(frameDay(L, i, sc)); }), L.day.w, B.SRC.DAY, L.day.x, L.day.y);
+    }
+    if (st.showBatt && !aod) {
+      addList(list(101, function (i) { return bgra(frameBatt(L, i, sc)); }), L.batt.w, B.SRC.BATTERY, L.batt.x, L.batt.y);
+    }
+    if (st.showSteps && !aod) {
+      var sid = 0x03000000 + slot.imageLists.length;
+      slot.imageLists.push(B.encImageList(L.steps.digW, L.sub.h, list(10, function (i) { return bgra(frameStepDigit(L, i, sc)); })));
+      addWidget(B.encNumberWidget(B.SRC.STEPS, sid, 5, 0x11), L.steps.x, L.steps.y);
+    }
+    if (analog) {
+      var set = handSet(aod);
+      set.hands.forEach(function (p) {
+        var h = p[1], img = addImage(h.canvas), px = Math.round(h.px), py = Math.round(h.py);
+        addWidget(B.encHandWidget(p[0], img, px, py), C - px, C - py);
+      });
+      slot.elements.push(B.encElement(addImage(set.cap), C - 13, C - 13));
+    }
+    return { slot: slot, L: L };
+  }
+
+  function previewBlob(L) {
+    var full = mk(W, W), g = full.getContext('2d');
+    g.drawImage(drawBackground(L, false), 0, 0);
+    var R = st.type === 'analog' ? L.mini : L, ds = [1, 0, 0, 8];
+    if (R) for (var i = 0; i < 4; i++) g.drawImage(drawDigit(R.dig, ds[i], st.tcolor), R.digits[i].x, R.digits[i].y);
+    if (st.showSteps) drawStepsValue(g, L, 8432, st.scolor);
+    if (st.showDate) { g.drawImage(frameWeekday(L, 1, st.scolor), L.weekday.x, L.weekday.y); g.drawImage(frameDay(L, 26, st.scolor), L.day.x, L.day.y); }
+    if (st.showBatt) g.drawImage(frameBatt(L, 85, st.scolor), L.batt.x, L.batt.y);
+    if (st.type === 'analog') drawHandsAt(g, handSet(false), 10, 8, 36);
+    var p = mk(246, 246), pg = p.getContext('2d');
+    pg.fillStyle = '#000'; pg.fillRect(0, 0, 246, 246);
+    pg.save(); pg.beginPath(); pg.arc(123, 123, 123, 0, Math.PI * 2); pg.clip();
+    pg.imageSmoothingQuality = 'high'; pg.drawImage(full, 0, 0, 246, 246); pg.restore();
+    return window.WFBuild.encImage(246, 246, bgra(p));
+  }
+
+  function ascii(s) {
+    var map = { 'ç': 'c', 'Ç': 'C', 'ğ': 'g', 'Ğ': 'G', 'ı': 'i', 'İ': 'I', 'ö': 'o', 'Ö': 'O', 'ş': 's', 'Ş': 'S', 'ü': 'u', 'Ü': 'U' };
+    return s.replace(/[çÇğĞıİöÖşŞüÜ]/g, function (c) { return map[c]; }).replace(/[^\x20-\x7e]/g, '').trim() || 'Kadran';
+  }
+
+  // ---- ZIP (sikistirmasiz)
+  var CRC = (function () { var t = new Uint32Array(256); for (var n = 0; n < 256; n++) { var c = n; for (var k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+  function crc32(b) { var c = 0xFFFFFFFF; for (var i = 0; i < b.length; i++) c = CRC[(c ^ b[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+  function zip(files) {
+    var enc = new TextEncoder(), parts = [], central = [], off = 0;
+    files.forEach(function (f) {
+      var name = enc.encode(f.name), crc = crc32(f.data), h = new Uint8Array(30 + name.length), v = new DataView(h.buffer);
+      v.setUint32(0, 0x04034b50, true); v.setUint16(4, 20, true); v.setUint16(8, 0, true);
+      v.setUint32(14, crc, true); v.setUint32(18, f.data.length, true); v.setUint32(22, f.data.length, true); v.setUint16(26, name.length, true);
+      h.set(name, 30);
+      var c = new Uint8Array(46 + name.length), cv2 = new DataView(c.buffer);
+      cv2.setUint32(0, 0x02014b50, true); cv2.setUint16(4, 20, true); cv2.setUint16(6, 20, true);
+      cv2.setUint32(16, crc, true); cv2.setUint32(20, f.data.length, true); cv2.setUint32(24, f.data.length, true); cv2.setUint16(28, name.length, true);
+      cv2.setUint32(42, off, true); c.set(name, 46);
+      parts.push(h, f.data); central.push(c); off += h.length + f.data.length;
+    });
+    var cdSize = central.reduce(function (a, c) { return a + c.length; }, 0);
+    var end = new Uint8Array(22), ev = new DataView(end.buffer);
+    ev.setUint32(0, 0x06054b50, true); ev.setUint16(8, files.length, true); ev.setUint16(10, files.length, true);
+    ev.setUint32(12, cdSize, true); ev.setUint32(16, off, true);
+    return new Blob(parts.concat(central, [end]), { type: 'application/zip' });
+  }
+
+  function setStatus(t, cls) { var s = $('status'); s.textContent = t; s.className = 'status' + (cls ? ' ' + cls : ''); }
+
+  async function exportFace() {
+    var btn = $('build'); btn.disabled = true; setStatus('Hazırlanıyor…');
+    try {
+      await new Promise(function (r) { setTimeout(r, 30); });
+      var normal = buildSlot(false), aod = buildSlot(true);
+      var id = '9' + String(Math.floor(Math.random() * 1e8)).padStart(8, '0');
+      var title = ascii(st.name);
+      var bin = window.WFBuild.build({ id: id, title: title, preview: previewBlob(normal.L), slots: [normal.slot, aod.slot] });
+      var file = title.replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'Kadran';
+      var guide = 'Xiaomi Watch S1 Active saat yuzu: ' + title + '\r\nKimlik: ' + id + '\r\n\r\n1) ' + file + '.bin dosyasini bu arsivden cikarin.\r\n2) Saat Gadgetbridge ile bagliyken dosyayi Gadgetbridge ile acin ve Yukle deyin.\r\n';
+      var mb = (bin.length / 1048576).toFixed(1) + ' MB';
+      if (APP) {
+        // Telefon uygulamasinda: dosyayi kaydet ve Gadgetbridge icin "birlikte ac" listesini goster
+        var bs = '', CH = 0x8000;
+        for (var i = 0; i < bin.length; i += CH) bs += String.fromCharCode.apply(null, bin.subarray(i, i + CH));
+        var r = window.KadranApp.save(file + '.bin', btoa(bs));
+        if (r.indexOf('ok:') !== 0) { setStatus('Kaydedilemedi: ' + r.slice(4), 'err'); return; }
+        setStatus('Kaydedildi: ' + (r.slice(3) ? r.slice(3) + '/' : '') + file + '.bin (' + mb + '). Açılan listeden Gadgetbridge\'i seç.', 'ok');
+        $('openGB').hidden = false;
+        window.KadranApp.open();
+        return;
+      }
+      if (STANDALONE) {
+        // Normal tarayicida: .bin dosyasi dogrudan iner
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([bin], { type: 'application/octet-stream' }));
+        a.download = file + '.bin'; document.body.appendChild(a); a.click();
+        setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+        setStatus('Hazır: ' + file + '.bin (' + mb + ') İndirilenler klasörüne indi.', 'ok');
+        return;
+      }
+      var blob = zip([{ name: file + '.bin', data: bin }, { name: 'OKU.txt', data: new TextEncoder().encode(guide) }]);
+      var dl = await window.claude.use('downloads');
+      if (!dl) { setStatus('Bu bağlantıda dosya indirme açık değil. Kadran Atölyesi\'nin site sürümünü kullan.', 'err'); return; }
+      await dl.save({ filename: file + '-S1Active.zip', data: blob });
+      setStatus('Hazır: ' + file + '.bin (' + mb + ') indirildi.', 'ok');
+    } catch (e) {
+      if (e && e.code === 'declined') setStatus('İndirme iptal edildi.', '');
+      else setStatus('Oluşturulamadı: ' + (e && e.message ? e.message : e), 'err');
+    } finally { btn.disabled = false; }
+  }
+
+  // ---- Resimleri tarayicida sakla (sayfa yenilenince kaybolmasin)
+  function storeImg(key, img, max, type) {
+    try {
+      var sc = Math.min(1, max / Math.max(img.width, img.height));
+      var c = mk(img.width * sc, img.height * sc); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      localStorage.setItem(key, c.toDataURL(type, 0.86));
+    } catch (e) {}
+  }
+  function loadImg(key, cb) {
+    var u = null; try { u = localStorage.getItem(key); } catch (e) {}
+    if (!u) return false;
+    var img = new Image(); img.onload = function () { cb(img); }; img.src = u; return true;
+  }
+  function dropImg(key) { try { localStorage.removeItem(key); } catch (e) {} }
+
+  // ---- Arayuz
+  function pressGroup(sel0, attr, val) { document.querySelectorAll(sel0).forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute(attr) === String(val))); }); }
+  function swatches(boxId, colors, key) {
+    var box = $(boxId); box.innerHTML = '';
+    colors.forEach(function (c) {
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'sw'; b.style.background = c; b.setAttribute('aria-label', c); b.dataset.c = c;
+      b.addEventListener('click', function () { st[key] = c; pick.value = c; mark(); render(); });
+      box.appendChild(b);
+    });
+    var pick = document.createElement('input'); pick.type = 'color'; pick.value = st[key]; pick.setAttribute('aria-label', 'Özel renk'); pick.id = boxId + 'Pick';
+    pick.addEventListener('input', function () { st[key] = pick.value; mark(); render(); });
+    box.appendChild(pick);
+    function mark() { box.querySelectorAll('.sw').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.c === st[key])); }); }
+    mark();
+  }
+  var fbox = $('fonts');
+  FONTS.forEach(function (f) {
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'chip fontchip'; b.dataset.font = f.id;
+    b.textContent = f.label; b.style.fontFamily = '"' + f.fam + '", sans-serif'; b.style.fontWeight = f.wt; b.setAttribute('aria-label', f.fam);
+    b.addEventListener('click', function () { st.font = f.id; pressGroup('[data-font]', 'data-font', f.id); render(); });
+    fbox.appendChild(b);
+  });
+  pressGroup('[data-font]', 'data-font', st.font);
+  swatches('timeColors', TIME_COLORS, 'tcolor');
+  swatches('handColors', TIME_COLORS, 'hcolor');
+  swatches('subColors', SUB_COLORS, 'scolor');
+  swatches('secColors', SEC_COLORS, 'seccolor');
+
+  function visibleEls() {
+    var a = [];
+    if (st.type !== 'analog') a.push('time');
+    if (st.showDate) a.push('date');
+    if (st.showBatt) a.push('batt');
+    if (st.showSteps) a.push('steps');
+    if (st.type === 'analog' && st.mini) a.push('mini');
+    return a;
+  }
+  var EL_FLAG = { date: 'showDate', batt: 'showBatt', steps: 'showSteps', mini: 'mini' };
+  function buildElChips() {
+    var box = $('elChips'), els = visibleEls();
+    var all = st.type === 'analog' ? ['mini', 'date', 'batt', 'steps'] : ['time', 'date', 'batt', 'steps'];
+    if (sel && els.indexOf(sel) < 0) sel = null;
+    if (!sel && els.length) sel = els[0];
+    box.innerHTML = '';
+    all.forEach(function (n) {
+      var on = els.indexOf(n) >= 0;
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'chip' + (on ? '' : ' off'); b.dataset.el = n;
+      b.textContent = (on ? '' : '+ ') + EL_NAMES[n];
+      b.setAttribute('aria-pressed', String(n === sel));
+      b.addEventListener('click', function () { if (!on) st[EL_FLAG[n]] = true; sel = n; sync(); render(); });
+      box.appendChild(b);
+    });
+  }
+
+  function sync() {
+    var analog = st.type === 'analog';
+    // sekmeler
+    if (!analog && tab === 'hands') tab = 'clock';
+    document.querySelectorAll('[data-tab]').forEach(function (b) {
+      b.setAttribute('aria-selected', String(b.dataset.tab === tab));
+      if (b.dataset.tab === 'hands') b.hidden = !analog;
+    });
+    document.querySelectorAll('[data-panel]').forEach(function (p) { p.hidden = p.dataset.panel !== tab; });
+    // arka plan
+    pressGroup('[data-bg]', 'data-bg', st.bg);
+    $('photoBox').hidden = st.bg !== 'photo';
+    $('colorBox').hidden = st.bg === 'photo';
+    $('bg2').hidden = st.bg === 'solid';
+    // saat
+    pressGroup('[data-type]', 'data-type', st.type);
+    pressGroup('[data-dial]', 'data-dial', st.dial);
+    $('dialGroup').hidden = !analog;
+    $('fontGroup').hidden = analog && !st.mini;
+    $('tsizeRow').hidden = analog;
+    $('fontTitle').textContent = analog ? 'Küçük saatin yazı tipi' : 'Yazı tipi';
+    $('tcolorTitle').textContent = analog ? 'Kadran rengi (çizgi, rakam, küçük saat)' : 'Rakam rengi';
+    $('tcolorNote').hidden = !analog;
+    // ibreler
+    pressGroup('[data-hand]', 'data-hand', st.hand);
+    $('customHandBox').hidden = st.hand !== 'custom';
+    $('handColorNote').hidden = st.hand !== 'custom';
+    pressGroup('[data-edit]', 'data-edit', editHand);
+    pressGroup('[data-hview]', 'data-hview', hview);
+    $('hImgL').textContent = handImgs[editHand] ? (editHand === 8 ? 'Akrep resmini değiştir' : 'Yelkovan resmini değiştir') : (editHand === 8 ? 'Akrep resmi seç' : 'Yelkovan resmi seç');
+    $('hDel').hidden = !handImgs[editHand];
+    var P = st.hc[editHand];
+    $('hs').value = P.s; $('hsO').textContent = P.s + '%';
+    $('ht').value = P.t; $('htO').textContent = P.t + '°';
+    $('secColors').hidden = !st.seconds;
+    // gostergeler
+    $('miniToggle').hidden = !analog;
+    ['shadow', 'showDate', 'showBatt', 'showSteps', 'seconds', 'mini', 'knockWhite'].forEach(function (k) { $(k).checked = !!st[k]; });
+    $('miniClock').checked = !!st.mini;
+    $('msizeRow').hidden = !(analog && st.mini);
+    $('miniNote').hidden = !(analog && st.mini);
+    buildElChips();
+    // surukleme imleci
+    cv.classList.toggle('draggable', canDrag());
+  }
+  function canDrag() {
+    if (mode !== 'normal') return false;
+    if (tab === 'bg') return st.bg === 'photo' && !!photo;
+    if (tab === 'info') return visibleEls().length > 0;
+    if (tab === 'hands') return aligning() && !!handImgs[editHand];
+    return false;
+  }
+  function setTab(t) { tab = t; try { localStorage.setItem('kadran-sekme', t); } catch (e) {} sync(); render(); }
+
+  document.querySelectorAll('[data-tab]').forEach(function (b) { b.addEventListener('click', function () { setTab(b.dataset.tab); }); });
+  document.querySelectorAll('[data-type]').forEach(function (b) { b.addEventListener('click', function () { st.type = b.dataset.type; sync(); render(); }); });
+  document.querySelectorAll('[data-dial]').forEach(function (b) { b.addEventListener('click', function () { st.dial = b.dataset.dial; sync(); render(); }); });
+  document.querySelectorAll('[data-hand]').forEach(function (b) { b.addEventListener('click', function () { st.hand = b.dataset.hand; sync(); render(); }); });
+  document.querySelectorAll('[data-edit]').forEach(function (b) { b.addEventListener('click', function () { editHand = +b.dataset.edit; sync(); render(); }); });
+  document.querySelectorAll('[data-hview]').forEach(function (b) { b.addEventListener('click', function () { hview = b.dataset.hview; sync(); render(); }); });
+  document.querySelectorAll('[data-bg]').forEach(function (b) {
+    b.addEventListener('click', function () { st.bg = b.dataset.bg; sync(); render(); if (st.bg === 'photo' && !photo) $('photo').click(); });
+  });
+
+  function slider(id, key, fmt, scale) {
+    var el = $(id), out = $(id + 'O');
+    el.value = scale ? st[key] * scale : st[key];
+    var show = function () { out.textContent = fmt(+el.value); };
+    show();
+    el.addEventListener('input', function () { st[key] = scale ? +el.value / scale : +el.value; show(); render(); });
+  }
+  slider('zoom', 'zoom', function (v) { return (v / 100).toFixed(1) + '×'; }, 100);
+  slider('dim', 'dim', function (v) { return v + '%'; });
+  slider('tsize', 'tsize', String);
+  slider('ssize', 'ssize', String);
+  slider('msize', 'msize', String);
+  slider('ring', 'ring', function (v) { return v + '%'; });
+  $('hs').addEventListener('input', function () { st.hc[editHand].s = +$('hs').value; $('hsO').textContent = $('hs').value + '%'; render(); });
+  $('ht').addEventListener('input', function () { st.hc[editHand].t = +$('ht').value; $('htO').textContent = $('ht').value + '°'; render(); });
+  $('hReset').addEventListener('click', function () { st.hc[editHand] = defHand(); sync(); render(); });
+  ['shadow', 'showDate', 'showBatt', 'showSteps', 'seconds', 'mini', 'knockWhite'].forEach(function (k) {
+    var el = $(k); el.checked = st[k];
+    el.addEventListener('change', function () { st[k] = el.checked; sync(); render(); });
+  });
+  $('miniClock').addEventListener('change', function () { st.mini = $('miniClock').checked; if (st.mini) sel = 'mini'; sync(); render(); });
+  [['bg1', 'bg1'], ['bg2', 'bg2']].forEach(function (p) { var el = $(p[0]); el.value = st[p[1]]; el.addEventListener('input', function () { st[p[1]] = el.value; render(); }); });
+  $('name').value = st.name; $('name').addEventListener('input', function () { st.name = $('name').value; render(); });
+
+  // Yerlesim dugmeleri
+  function boxCenter(n) { var b = lastL && lastL.boxes[n]; return b ? { x: b.x + b.w / 2, y: b.y + b.h / 2 } : null; }
+  document.querySelectorAll('[data-nudge]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      if (!sel) return; var c = boxCenter(sel); if (!c) return;
+      var d = b.dataset.nudge.split(',').map(Number);
+      st.pos[sel] = { x: c.x + d[0] * 4, y: c.y + d[1] * 4 }; render();
+    });
+  });
+  $('elCenter').addEventListener('click', function () { if (!sel) return; var c = boxCenter(sel); if (!c) return; st.pos[sel] = { x: C, y: c.y }; render(); });
+  $('elReset').addEventListener('click', function () { if (!sel) return; delete st.pos[sel]; render(); });
+
+  // Resimler
+  function useImage(file, cb) {
+    var img = new Image();
+    img.onload = function () { cb(img); };
+    img.onerror = function () { setStatus('Bu resim açılamadı. PNG veya JPG dene.', 'err'); };
+    img.src = URL.createObjectURL(file);
+  }
+  $('photo').addEventListener('change', function (e) {
+    var f = e.target.files && e.target.files[0]; if (!f) return;
+    useImage(f, function (img) { photo = img; st.bg = 'photo'; st.ox = 0; st.oy = 0; storeImg('kadran-foto', img, 1000, 'image/jpeg'); sync(); render(); });
+  });
+  function setHandImage(kind, img, keep) {
+    handImgs[kind] = img; delete handCache[kind + ':true']; delete handCache[kind + ':false'];
+    if (!keep) { st.hc[kind] = defHand(); storeImg('kadran-ibre-' + kind, img, 600, 'image/png'); }
+    st.hand = 'custom'; sync(); render();
+  }
+  $('hImg').addEventListener('change', function (e) {
+    var f = e.target.files && e.target.files[0]; if (!f) return;
+    var kind = editHand;
+    useImage(f, function (img) { setHandImage(kind, img, false); });
+    e.target.value = '';
+  });
+  $('hDel').addEventListener('click', function () { handImgs[editHand] = null; dropImg('kadran-ibre-' + editHand); sync(); render(); });
+  loadImg('kadran-foto', function (img) { photo = img; sync(); render(); });
+  [8, 16].forEach(function (k) { loadImg('kadran-ibre-' + k, function (img) { handImgs[k] = img; sync(); render(); }); });
+
+  // Onizlemede surukleme
+  var drag = null;
+  function toCanvas(e) { var r = cv.getBoundingClientRect(), k = W / r.width; return { x: (e.clientX - r.left) * k, y: (e.clientY - r.top) * k, k: k }; }
+  cv.addEventListener('pointerdown', function (e) {
+    if (!canDrag()) return;
+    var p = toCanvas(e);
+    if (tab === 'bg') drag = { kind: 'photo', sx: p.x, sy: p.y, ox: st.ox, oy: st.oy };
+    else if (tab === 'hands') { var H = st.hc[editHand]; drag = { kind: 'hand', sx: p.x, sy: p.y, ox: H.x, oy: H.y }; }
+    else if (tab === 'info') {
+      var hit = null, order = ['batt', 'steps', 'date', 'mini', 'time'];
+      for (var i = 0; i < order.length; i++) {
+        var b = lastL && lastL.boxes[order[i]];
+        if (b && p.x >= b.x - 12 && p.x <= b.x + b.w + 12 && p.y >= b.y - 12 && p.y <= b.y + b.h + 12) { hit = order[i]; break; }
+      }
+      if (hit) { sel = hit; buildElChips(); }
+      var c = sel && boxCenter(sel);
+      if (!c) return;
+      drag = { kind: 'el', sx: p.x, sy: p.y, ox: c.x, oy: c.y };
+    }
+    if (drag) { cv.setPointerCapture(e.pointerId); cv.classList.add('dragging'); render(); }
+  });
+  cv.addEventListener('pointermove', function (e) {
+    if (!drag) return;
+    var p = toCanvas(e), dx = p.x - drag.sx, dy = p.y - drag.sy;
+    if (drag.kind === 'photo') { st.ox = drag.ox + dx; st.oy = drag.oy + dy; }
+    else if (drag.kind === 'hand') {
+      var t = -st.hc[editHand].t * Math.PI / 180, co = Math.cos(t), si = Math.sin(t);
+      st.hc[editHand].x = Math.round(drag.ox + dx * co - dy * si);
+      st.hc[editHand].y = Math.round(drag.oy + dx * si + dy * co);
+    } else {
+      var b = lastL.boxes[sel];
+      st.pos[sel] = { x: Math.round(Math.min(Math.max(drag.ox + dx, b.w / 2), W - b.w / 2)), y: Math.round(Math.min(Math.max(drag.oy + dy, b.h / 2), W - b.h / 2)) };
+    }
+    render();
+  });
+  function endDrag() { drag = null; cv.classList.remove('dragging'); }
+  cv.addEventListener('pointerup', endDrag); cv.addEventListener('pointercancel', endDrag);
+
+  $('mNormal').addEventListener('click', function () { mode = 'normal'; $('mNormal').setAttribute('aria-pressed', 'true'); $('mAod').setAttribute('aria-pressed', 'false'); sync(); render(); });
+  $('mAod').addEventListener('click', function () { mode = 'aod'; $('mAod').setAttribute('aria-pressed', 'true'); $('mNormal').setAttribute('aria-pressed', 'false'); sync(); render(); });
+  $('build').addEventListener('click', exportFace);
+
+  window.__kadran = {
+    buildSlot: buildSlot, previewBlob: previewBlob, st: st, layout: layout, ascii: ascii, zip: zip,
+    setTab: setTab, sync: sync, paint: paint,
+    setHandImage: function (kind, url) { var img = new Image(); img.onload = function () { setHandImage(kind, img, true); }; img.src = url; }
+  };
+
+  if (APP) {
+    $('step1').textContent = 'Oluştura basınca dosya İndirilenler/Kadran klasörüne kaydedilir ve bir uygulama listesi açılır.';
+    $('step2').textContent = 'Saat Gadgetbridge\'e bağlıyken listeden Gadgetbridge\'i seç. Listede yoksa dosyayı İndirilenler/Kadran klasöründen Gadgetbridge ile aç.';
+    $('openGB').addEventListener('click', function () { window.KadranApp.open(); });
+  }
+  if (STANDALONE) $('step1').textContent = 'Oluşturduğun .bin dosyası telefonunun İndirilenler klasörüne iner.';
+  var need = FONTS.map(function (f) { return f.wt + ' 40px "' + f.fam + '"'; }).concat([SUB_FONT.wt + ' 30px "' + SUB_FONT.fam + '"']);
+  sync();
+  paint();
+  Promise.all(need.map(function (f) { return document.fonts.load(f, 'ÇAR0123456789:%'); })).catch(function () {}).then(function () { paint(); });
+  setInterval(function () { if ((st.type === 'analog' && st.seconds && mode === 'normal' && !aligning()) || new Date().getSeconds() === 0) render(); }, 1000);
+})();
+</script>

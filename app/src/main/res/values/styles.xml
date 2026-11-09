@@ -1,0 +1,10 @@
+<resources>
+  <style name="AppTheme" parent="@android:style/Theme.DeviceDefault.Light.NoActionBar">
+    <item name="android:statusBarColor">#e9ecf1</item>
+    <item name="android:navigationBarColor">#e9ecf1</item>
+    <item name="android:windowLightStatusBar">true</item>
+    <item name="android:windowBackground">@color/ic_bgpage</item>
+  </style>
+  <color name="ic_bgpage">#e9ecf1</color>
+  <color name="ic_kadran_bg">#2b55d9</color>
+</resources>
